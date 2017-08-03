@@ -12,13 +12,17 @@ import (
   "github.com/pjdufour/go.rice"
 )
 
-func LoadPathsFromBox(templatesBox *rice.Box, current *rice.File, paths []string) ([]string, error) {
+func LoadPathsFromBox(templatesBox *rice.Box, current *rice.File, parent string, paths []string) ([]string, error) {
 
   current_stat, err := current.Stat()
   if err != nil {
     return nil, errors.New("Error: Could not stat current directory.")
   }
+
   basepath := current_stat.Name()
+  if len(parent) > 0 {
+    basepath = parent + "/" + basepath
+  }
 
   infos, err := current.Readdir(0)
   current.Close()
@@ -28,11 +32,11 @@ func LoadPathsFromBox(templatesBox *rice.Box, current *rice.File, paths []string
 
   for _, info := range infos {
     if info.IsDir() {
-      next, err := templatesBox.Open(info.Name())
+      next, err := templatesBox.Open(basepath+"/"+info.Name())
       if err != nil {
         return nil, err
       }
-      paths, err = LoadPathsFromBox(templatesBox, next, paths)
+      paths, err = LoadPathsFromBox(templatesBox, next, basepath, paths)
       if err != nil {
         return nil, err
       }
@@ -66,7 +70,7 @@ func LoadTemplatesFromBinary(templatesBox *rice.Box, templateFunctions template.
 		return nil, errors.New("Error: Root of rice box for templates is not a directory.")
 	}
 
-  paths, err := LoadPathsFromBox(templatesBox, root, []string{})
+  paths, err := LoadPathsFromBox(templatesBox, root, "", []string{})
   if err != nil {
     return nil, errors.New("Error: Could not load paths.")
   }
