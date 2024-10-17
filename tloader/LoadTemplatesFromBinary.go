@@ -9,7 +9,7 @@ import (
 )
 
 import (
-  "github.com/pjdufour/go.rice"
+  "github.com/GeertJohan/go.rice"
 )
 
 func LoadPathsFromBox(templatesBox *rice.Box, current *rice.File, parent string, paths []string) ([]string, error) {
